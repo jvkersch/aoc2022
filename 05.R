@@ -69,7 +69,13 @@ load_data <- function(fname ) {
   list(stacks=stacks, instructions=instructions)
 }
 
+top_layer <- function(stacks) {
+  paste(map_chr(stacks, tail, n=1), collapse = "")
+}
+
 data <- load_data("inputs/05.txt")
 
 stacks1 <- move_all(data$stacks, data$instructions, reverse = TRUE)
-print(paste(map_chr(stacks1, tail, n=1), collapse = ""))
+print(top_layer(stacks1))
+stacks2 <- move_all(data$stacks, data$instructions, reverse = FALSE)
+print(top_layer(stacks2))
