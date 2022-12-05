@@ -1,10 +1,9 @@
 library(purrr)
-library(stringr)
 
 chores <- readLines("inputs/04.txt") |>
-  map(~ str_match(.x, "(\\d+)-(\\d+),(\\d+)-(\\d+)")[2:5]) |> 
+  strsplit("[,-]") |>
+  map(as.integer) |>
   unlist() |>
-  map_int(strtoi) |>
   matrix(ncol = 4, byrow = TRUE)
 colnames(chores) <- c("x1", "y1", "x2", "y2")
 chores <- as.data.frame(chores)
