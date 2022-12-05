@@ -34,28 +34,42 @@ split_at <- function(items, idx) {
   }
 }
 
-move <- function(stacks, instr) {
+move <- function(stacks, instr, reverse = TRUE) {
   howmany <- instr[[1]]
   from_idx <- instr[[2]]
   to_idx <- instr[[3]]
 
   from <- stacks[[instr[[2]]]]
   s <- split_at(from, length(from) - howmany + 1)
-
-  stacks[[to_idx]] <- c(stacks[[to_idx]], rev(s[[2]]))
+  if (reverse) {
+    s[[2]] = rev(s[[2]])
+  }
+  
+  stacks[[to_idx]] <- c(stacks[[to_idx]], s[[2]])
   stacks[[from_idx]] <- s[[1]]
 
   return(stacks)
 }
 
-data <- readLines("inputs/05.txt")
-cutoff <- which(data == "")
-ncols <- parse_numline(data[[cutoff-1]])
-stacks <- map(1:ncols, parse_column, data[seq(cutoff-2, 1)])
-instructions <- map(data[(cutoff+1):length(data)], parse_instruction)
-
-for (instr in instructions) {
-  stacks = move(stacks, instr)
+move_all <- function(stacks, instructions, reverse = TRUE) {
+  for (instr in instructions) {
+    stacks = move(stacks, instr, reverse = reverse)
+  }
+  stacks
 }
 
-print(paste(map_chr(stacks, tail, n=1), collapse = ""))
+load_data <- function(fname ) {
+  data <- readLines(fname)
+  cutoff <- which(data == "")
+  ncols <- parse_numline(data[[cutoff-1]])
+  
+  stacks <- map(1:ncols, parse_column, data[seq(cutoff-2, 1)])
+  instructions <- map(data[(cutoff+1):length(data)], parse_instruction)
+
+  list(stacks=stacks, instructions=instructions)
+}
+
+data <- load_data("inputs/05.txt")
+
+stacks1 <- move_all(data$stacks, data$instructions, reverse = TRUE)
+print(paste(map_chr(stacks1, tail, n=1), collapse = ""))
