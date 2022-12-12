@@ -11,22 +11,43 @@ disp_y <- list(R=0, L=0, U=1, D=-1)
 offset_x <- c(-1, 0, 1, -1, 0, 1, -1, 0, 1)
 offset_y <- c(1, 1, 1, 0, 0, 0, -1, -1, -1)
 
-pos <- c(0, 0, 5)
-all_tl <- list(c(0, 0))
-update <- function(pos, motion) {
-  direction <- motion[[1]]
-  howmany <- motion[[2]]
-  for (i in seq(1, howmany)) {
-    pos[[1]] <- hd_x <- pos[[1]] + disp_x[[direction]]
-    pos[[2]] <- hd_y <- pos[[2]] + disp_y[[direction]]
-    pos[[3]] <- tl <- disp_tl[[direction]][[pos[[3]]]]
-    all_tl <<- append(all_tl, list(c(hd_x + offset_x[tl], hd_y + offset_y[tl])))
+move_rope <- function(motions) {
+  npos <- sum(map_int(motions, 2)) + 1
+  all_pos <- vector(mode = "list", length = 10)
+
+  i <- 1
+  hd_x <- 0
+  hd_y <- 0
+  tl <- 5
+  all_pos[[i]] <- c(hd_x, hd_y, tl)
+  for (motion in motions) {
+    direction <- motion[[1]]
+    howmany <- motion[[2]]
+    for (j in seq(1, howmany)) {
+      hd_x <- hd_x + disp_x[[direction]]
+      hd_y <- hd_y + disp_y[[direction]]
+      tl <- disp_tl[[direction]][[tl]]
+      i <- i + 1
+      all_pos[[i]] <- c(hd_x, hd_y, tl)
+    }
   }
-  pos
+  
+  all_pos
 }
+to_abs <- function(pos) {
+  hd_x <- pos[[1]]
+  hd_y <- pos[[2]]
+  tl <- pos[[3]]
+  c(hd_x + offset_x[[tl]], hd_y + offset_y[[tl]])
+}
+
 motions <- readLines("inputs/09.txt") |>
   strsplit(" ") |>
   map(~ list(.x[[1]], as.integer(.x[[2]])))
 
-accumulate(motions, update, .init = pos)
-print(length(unique(all_tl)))
+all_pos <- move_rope(motions)
+
+n <- map(all_pos, to_abs) |>
+  unique() |>
+  length()
+print(n)
